@@ -1,0 +1,35 @@
+Na AWS, Security Groups e Network ACLs (NACLs) são ferramentas importantes para controlar o tráfego de rede em seus recursos EC2. Embora ambos sejam usados para controlar o acesso, eles funcionam de maneiras diferentes e têm propósitos específicos. Vamos detalhar as diferenças entre eles:
+
+### Nível de Ação
+
+- **Security Groups**: Operam no nível de instância. Cada instância pode ter zero ou mais security groups associados a ela. As regras de security group determinam o tráfego que pode entrar e sair da instância.
+- **Network ACLs**: Operam no nível de sub-rede. Cada sub-rede pode ter zero ou mais NACLs associados a ela. As regras de NACL determinam o tráfego que pode entrar e sair da sub-rede.
+
+### Stateful ou Stateless
+
+- **Security Groups**: São stateful. Isso significa que eles mantêm o estado do fluxo de tráfego e podem permitir o tráfego de retorno automaticamente.
+- **Network ACLs**: São stateless. Isso significa que elas não mantêm o estado do fluxo de tráfego e não permitem o tráfego de retorno automaticamente.
+
+### Tipos de Regras (Allow/Deny)
+
+- **Security Groups**: Podem ter regras de allow (permitir) e deny (negar). As regras de allow permitem o tráfego, enquanto as regras de deny negam o tráfego.
+- **Network ACLs**: Também podem ter regras de allow (permitir) e deny (negar). As regras de allow permitem o tráfego, enquanto as regras de deny negam o tráfego.
+
+### Ordem de Avaliação
+
+- **Security Groups**: As regras são avaliadas em ordem de prioridade, com as regras mais específicas (mais permissivas) sendo avaliadas primeiro. As regras de allow vêm antes das regras de deny.
+- **Network ACLs**: As regras são avaliadas em ordem de prioridade, com as regras mais específicas (mais permissivas) sendo avaliadas primeiro. As regras de allow vêm antes das regras de deny.
+
+### Quantos Pode Ser Associado
+
+- **Security Groups**: Cada instância pode ter até 50 security groups associados a ela.
+- **Network ACLs**: Cada sub-rede pode ter até 10 NACLs associados a ela.
+
+### Documentação da AWS
+
+Para mais detalhes, você pode consultar a documentação oficial da AWS:
+
+- **Security Groups**: [AWS Security Groups Documentation](https://docs.aws.amazon.com/pt_br/vpc/latest/userguide/security-group.html)
+- **Network ACLs**: [AWS Network ACLs Documentation](https://docs.aws.amazon.com/pt_br/vpc/latest/userguide/nat-gateway.html#nat-gateway-network-acls)
+
+Essas páginas fornecem informações detalhadas sobre como configurar, gerenciar e usar Security Groups e Network ACLs na AWS.

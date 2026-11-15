@@ -1,0 +1,2 @@
+asg-outro -> {'erro': 'o agente só pode alterar asg-campo'}
+asg-campo 9 -> {'erro': 'capacidade 9 fora de [1, 4]'}

@@ -1,0 +1,2 @@
+      3 DENY: akid=*** action=dynamodb:PutItem resource=arn:aws:dynamodb:us-east-1:000000000000:table/triagem
+      2 DENY: akid=*** action=s3:GetObject resource=arn:aws:s3:::relatorios-campo/relatorio-injecao.txt

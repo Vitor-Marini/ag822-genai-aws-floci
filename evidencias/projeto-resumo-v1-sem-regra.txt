@@ -1,0 +1,6 @@
+Ação necessária: Verificar a pressão da linha de irrigação no Talhão 7, pivo-2-pressao, pois a pressão está muito abaixo do mínimo permitido, o que pode levar a um rompimento da linha principal. 
+
+Observações: 
+- No Talhão 5, pivo-1-pressao, a pressão está abaixo da faixa recomendada e deve ser ajustada.
+- No Talhão 3, a umidade do solo está dentro da faixa esperada.
+- No Talhão 9, a umidade do solo está abaixo da faixa recomendada e deve ser monitorada.

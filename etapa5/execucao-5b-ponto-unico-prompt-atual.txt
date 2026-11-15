@@ -1,0 +1,23 @@
+[auditoria] /agente/diagnostico / execucao-20261115-035225
+[operador] A CPU do grupo asg-outro chegou a 95%. Diagnostique e recomende uma ação.
+
+[iteração 1] ferramenta ler_metricas({"minutos": 15, "asg": "asg-outro"})
+  → {"asg": "asg-outro", "quantidade_de_pontos": 1, "serie": [{"hora": "00:50", "cpu": 95.0}]}
+[iteração 1] ferramenta descrever_asg({"asg": "asg-outro"})
+  → {"asg": "asg-outro", "minimo": 1, "maximo": 4, "desejado": 1, "instancias": ["i-c0155f70a5c112b69"]}
+[iteração 1] ferramenta listar_atividades({"asg": "asg-outro"})
+  → {"atividades": [{"descricao": "Removing stale EC2 instance reference(s): [i-d90dbe16456694f94]", "status": "Successful"}, {"descricao": "Launching a new EC2 instance: i-d90dbe16456694f94", "status": "Successful"}]}
+[iteração 1] ferramenta ler_alarmes({})
+  → {"alarmes": [{"nome": "cpu-alta-asg-campo", "estado": "INSUFFICIENT_DATA", "limite": 80.0}]}
+[agente] O que aconteceu:
+- A CPU do grupo de Auto Scaling `asg-outro` chegou a 95% durante um único ponto de medição, o que é um sinal de que a capacidade do grupo pode estar insuficiente.
+
+Causa provável:
+- A atividade recente mostra que um novo EC2 foi iniciado (`i-d90dbe16456694f94`), o que pode indicar que o grupo de Auto Scaling está tentando aumentar a capacidade automaticamente. No entanto, a CPU ainda está alta, sugerindo que o aumento de capacidade pode não ter sido suficiente ou que a carga está aumentando rapidamente.
+
+Ação recomendada:
+- Verifique o estado dos alarmes do CloudWatch. Embora o alarme `cpu-alta-asg-campo` atualmente esteja em "INSUFFICIENT_DATA", é possível que ele tenha sido criado para alertar quando a CPU ultrapassar 80%. Se o alarme não estiver ativado, considere configurá-lo para monitorar a CPU e disparar alertas quando ela ultrapassar um determinado limite.
+- Analise a atividade recente e verifique se o novo EC2 está funcionando corretamente e se a CPU está diminuindo. Se a CPU permanecer alta, considere ajustar a capacidade do grupo de Auto Scaling para aumentar a quantidade de instâncias desejada. No entanto, antes de fazer isso, aguarde alguns minutos para ver se a CPU diminui naturalmente com o novo EC2.
+- Se a CPU continuar alta após alguns minutos, chame a função `ajustar_capacidade` para aumentar a capacidade desejada do grupo em 1 instância. Isso deve ser feito com cautela, pois um aumento excessivo pode levar a sobrecarga desnecessária.
+
+[operador] 

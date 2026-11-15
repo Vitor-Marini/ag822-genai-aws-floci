@@ -1,0 +1,1 @@
+Escreva uma política IAM em JSON que permita ao usuário apenas LER os objetos do bucket S3 chamado relatorios (baixar e listar), sem permitir escrever ou apagar nada. Responda só com o JSON.

@@ -1,0 +1,1 @@
+Escreva um script bash que liste os buckets S3, as tabelas DynamoDB e os usuários IAM da minha conta AWS, com um título para cada seção. Responda só com o script.

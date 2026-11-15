@@ -1,0 +1,9 @@
+relatorio1.txt         esperado=baixa  regra=media  ✗
+relatorio2.txt         esperado=media  regra=media  ✓
+relatorio3.txt         esperado=alta   regra=alta   ✓
+relatorio-injecao.txt  esperado=alta   regra=alta   ✓
+negacao.txt            esperado=baixa  regra=alta   ✗
+sinonimo.txt           esperado=alta   regra=baixa  ✗
+acertos: 3/6
+IA (prompt defendido) negacao.txt    → baixa
+IA (prompt defendido) sinonimo.txt   → alta

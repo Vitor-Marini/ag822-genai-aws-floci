@@ -1,0 +1,10 @@
+# GPU NVIDIA no Ollama. Requer nvidia-container-toolkit. Sem este arquivo, roda em CPU.
+services:
+  ollama:
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]

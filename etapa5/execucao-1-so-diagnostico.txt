@@ -1,0 +1,25 @@
+[auditoria] /agente/diagnostico / execucao-20261115-034300
+[operador] O alarme cpu-alta-asg-campo disparou. Diagnostique o grupo asg-campo e recomende uma ação.
+
+[iteração 1] ferramenta ler_metricas({"asg": "asg-campo", "minutos": 15})
+  → {"asg": "asg-campo", "quantidade_de_pontos": 12, "serie": [{"hora": "00:31", "cpu": 30.0}, {"hora": "00:32", "cpu": 34.0}, {"hora": "00:33", "cpu": 33.7}, {"hora": "00:34", "cpu": 38.7}, {"hora": "00:35", "cpu": 46.3}, {"hora": "00:36", "cpu": 54.0}, {"hora": "00:37", "cpu": 64.0}, {"hora": "00:38",
+[iteração 1] ferramenta descrever_asg({"asg": "asg-campo"})
+  → {"asg": "asg-campo", "minimo": 1, "maximo": 4, "desejado": 1, "instancias": ["i-28b608f21c60b9f36"]}
+[iteração 1] ferramenta listar_atividades({"asg": "asg-campo"})
+  → {"atividades": [{"descricao": "Launching a new EC2 instance: i-28b608f21c60b9f36", "status": "Successful"}, {"descricao": "Removing stale EC2 instance reference(s): [i-6c94334dcb0a7890a]", "status": "Successful"}, {"descricao": "Launching a new EC2 instance: i-6c94334dcb0a7890a", "status": "Successf
+[iteração 1] ferramenta ler_alarmes({})
+  → {"alarmes": [{"nome": "cpu-alta-asg-campo", "estado": "ALARM", "limite": 80.0}]}
+[agente] O que aconteceu:
+- O grupo de Auto Scaling `asg-campo` está enfrentando uma alta carga de CPU, com a média de CPU chegando a 95% em vários minutos. Isso levou ao disparo do alarme `cpu-alta-asg-campo`, que tem um limite estabelecido em 80%.
+- Recentemente, o grupo de Auto Scaling lançou duas novas instâncias (`i-28b608f21c60b9f36` e `i-6c94334dcb0a7890a`), mas isso não parece ter sido suficiente para aliviar a carga.
+
+Causa provável:
+- A alta carga de CPU pode estar sendo causada por uma demanda inesperada de trabalho, como uma tarefa de processamento intensivo que foi iniciada recentemente.
+- O aumento gradual da CPU sugere que a demanda pode estar crescendo, o que pode indicar um problema de escalonamento.
+
+Ação recomendada:
+- Verifique as atividades recentes e os logs das instâncias para identificar quaisquer tarefas que possam estar causando a alta carga de CPU.
+- Se a demanda for constante e a tendência de alta de CPU continuar, pode ser necessário aumentar a capacidade do grupo de Auto Scaling. No entanto, isso deve ser feito com cautela, considerando o limite máximo do grupo.
+- Monitorar o grupo de Auto Scaling e as métricas de CPU por mais alguns minutos para confirmar se a tendência de alta de CPU continua antes de tomar uma decisão.
+
+Antes de ajustar a capacidade, é recomendável que um humano revise a situação e aprovem a ação.

@@ -1,0 +1,10 @@
+*/.chave-agente
+data/
+.empacotado.yaml
+.env
+__pycache__/
+.python-version
+*/.sem-cerca.yaml
+tools/
+.venv/
+*.zip

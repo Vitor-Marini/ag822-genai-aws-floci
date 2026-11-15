@@ -1,0 +1,6 @@
+inferências: 6
+latência média: 5.18 s (mín 2.15, máx 9.36)
+tokens médios: entrada 232, saída 34
+GPU: potência ociosa 20.2 W, durante inferência 28.3 W (pico 35.8 W), uso médio 50 %, VRAM 2734 MiB
+Ollama (docker stats): CPU média 370 %, pico 402 %, RAM 4.433GiB
+energia da GPU por relatório: 147 J = 40.71 mWh

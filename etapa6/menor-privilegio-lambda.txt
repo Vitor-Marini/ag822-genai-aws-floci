@@ -1,0 +1,6 @@
+# Role triagem-lambda (Etapa 4) com IAM_ENFORCEMENT=true — política construída pelas negações reais do Floci
+v0  role sem nenhuma política         → DENY s3:GetObject       arn:aws:s3:::relatorios-campo/relatorio-injecao.txt
+v1  + s3:GetObject relatorios-campo/* → DENY dynamodb:PutItem   arn:aws:dynamodb:us-east-1:000000000000:table/triagem
+                                        (bedrock converse passou sem permissão: o Floci não avalia IAM do bedrock-runtime)
+v2  + dynamodb:PutItem na tabela      → 0 negações, item gravado
+    + bedrock:InvokeModel (só o modelo) e logs do próprio log group: não exigidos pelo Floci, obrigatórios na AWS real

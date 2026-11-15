@@ -1,0 +1,30 @@
+Aqui está uma explicação detalhada das diferenças entre Security Groups e Network ACLs (NACLs) na AWS, com base na documentação fornecida:
+
+### Nível de Operação
+- **Security Groups**: Operam no nível de instância. Isso significa que cada instância pode ter um ou mais grupos de segurança associados.
+- **Network ACLs**: Operam no nível de sub-rede. Isso significa que uma sub-rede pode ter um ou mais ACLs associados.
+
+### Escopo
+- **Security Groups**: Aplicam-se a todas as instâncias associadas a um grupo de segurança.
+- **Network ACLs**: Aplicam-se a todas as instâncias em sub-redes associadas a um ACL.
+
+### Tipos de Regra
+- **Security Groups**: Permite apenas regras de "allow" (permitir).
+- **Network ACLs**: Permite tanto regras de "allow" (permitir) quanto "deny" (negar).
+
+### Avaliação de Regras
+- **Security Groups**: Avalia todas as regras antes de decidir se a permissão deve ser concedida. É um processo stateful, pois leva em consideração o estado do fluxo de tráfego.
+- **Network ACLs**: Avalia as regras em ordem crescente até encontrar uma correspondência para o tráfego. É um processo stateless, pois cada regra é avaliada independentemente.
+
+### Tráfego de Retorno
+- **Security Groups**: O tráfego de retorno é automaticamente permitido (stateful).
+- **Network ACLs**: O tráfego de retorno deve ser explicitamente permitido (stateless).
+
+### Associação
+- **Security Groups**: Pode associar vários grupos de segurança a uma instância.
+- **Network ACLs**: Pode associar vários ACLs a uma sub-rede.
+
+### Referências
+- Para mais detalhes, consulte a tabela e a figura na seção "Compare security groups and network ACLs" da documentação oficial: [AWS VPC User Guide - Security Groups and Network ACLs Comparison](https://docs.aws.amazon.com/vpc/latest/userguide/infrastructure-security.html#VPC_Security_Comparison).
+
+Essas diferenças refletem as diferentes abordagens de segurança que os dois mecanismos oferecem, permitindo que você escolha a melhor opção dependendo das necessidades específicas do seu ambiente AWS.

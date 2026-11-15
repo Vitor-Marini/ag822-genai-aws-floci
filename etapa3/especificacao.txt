@@ -1,0 +1,9 @@
+Gere um template AWS CloudFormation em YAML para o laboratório abaixo. Responda só com o YAML.
+1. Uma VPC 10.0.0.0/16 com DNS habilitado e um Internet Gateway.
+2. Sub-rede pública 10.0.1.0/24 (us-east-1a) com rota 0.0.0.0/0 para o Internet Gateway.
+3. Sub-rede privada 10.0.2.0/24 (us-east-1a), sem rota para a internet.
+4. Um Security Group que libera apenas HTTP (porta 80) de qualquer lugar.
+5. Uma instância EC2 t3.micro na sub-rede pública, com IP público, servidor web Apache instalado via UserData.
+6. Um bucket S3 chamado relatorios-campo-lab para os relatórios da Etapa 4.
+7. Uma tabela DynamoDB chamada triagem-lab, chave de partição "arquivo" (string), cobrança sob demanda.
+8. Outputs com o IP público da instância, o nome do bucket e o ARN da tabela.

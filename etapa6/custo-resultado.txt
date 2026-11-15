@@ -1,0 +1,11 @@
+Volume: 15000 relatórios/mês; tokens por relatório: 232 entrada + 34 saída
+
+Opção                         US$/relatório  Modelo/mês  Lambda/mês  Total/mês  Empate GPU (rel./dia)
+Claude 3 Haiku                    0.0001005        1.51       0.067       1.57                127,357
+Claude Haiku 4.5 (global)         0.0004020        6.03       0.067       6.10                 31,839
+Amazon Nova Lite                  0.0000221        0.33       0.067       0.40                579,680
+Amazon Nova Micro                 0.0000129        0.19       0.067       0.26                993,737
+Regras fixas (sem IA)             0.0000000        0.00       0.006      0.006                      —
+Modelo local em g4dn.xlarge       0.0255987      383.98           —     383.98                      —
+
+Lambda antes do nível gratuito (400 mil GB-s/mês cobrem estes volumes); S3 e DynamoDB fora da conta.

@@ -1,0 +1,174 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  Projeto integrador AG822 (agronegócio) - triagem de alertas de sensores de irrigação com Bedrock,
+  alerta imediato por SNS e resumo diário gerado por IA.
+
+Parameters:
+  Projeto:
+    Type: String
+    Default: irrigacao-ia
+  ModeloId:
+    Type: String
+    Default: anthropic.claude-3-haiku-20240307-v1:0   # no Floci é mapeado para o modelo local do Ollama
+  HorarioResumo:
+    Type: String
+    Default: cron(0 21 * * ? *)   # 18h em Brasília (21h UTC)
+
+Resources:
+  # ---------- armazenamento ----------
+  AlertasBucket:
+    Type: AWS::S3::Bucket
+    DependsOn: TriagemPermissaoS3
+    Properties:
+      BucketName: !Sub ${Projeto}-${AWS::AccountId}
+      PublicAccessBlockConfiguration: {BlockPublicAcls: true, BlockPublicPolicy: true, IgnorePublicAcls: true, RestrictPublicBuckets: true}
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: [{ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}}]
+      NotificationConfiguration:
+        LambdaConfigurations:
+          - Event: s3:ObjectCreated:*
+            Function: !GetAtt TriagemFunction.Arn
+            Filter: {S3Key: {Rules: [{Name: prefix, Value: alertas/}]}}   # resumos/ não dispara a triagem
+      Tags: [{Key: Projeto, Value: !Ref Projeto}]
+
+  AlertasTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub ${Projeto}-alertas
+      AttributeDefinitions: [{AttributeName: id, AttributeType: S}]
+      KeySchema: [{AttributeName: id, KeyType: HASH}]
+      BillingMode: PAY_PER_REQUEST
+      Tags: [{Key: Projeto, Value: !Ref Projeto}]
+
+  # ---------- notificação ----------
+  AlertasTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: !Sub ${Projeto}-avisos
+      Tags: [{Key: Projeto, Value: !Ref Projeto}]
+
+  EquipeQueue:   # caixa de entrada da equipe de campo; na AWS real seria e-mail/SMS
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub ${Projeto}-equipe
+      Tags: [{Key: Projeto, Value: !Ref Projeto}]
+
+  EquipeQueuePolicy:
+    Type: AWS::SQS::QueuePolicy
+    Properties:
+      Queues: [!Ref EquipeQueue]
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal: {Service: sns.amazonaws.com}
+            Action: sqs:SendMessage
+            Resource: !GetAtt EquipeQueue.Arn
+            Condition: {ArnEquals: {aws:SourceArn: !Ref AlertasTopic}}
+
+  EquipeSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      TopicArn: !Ref AlertasTopic
+      Protocol: sqs
+      Endpoint: !GetAtt EquipeQueue.Arn
+
+  # ---------- triagem (IA como componente) ----------
+  TriagemRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{Effect: Allow, Principal: {Service: lambda.amazonaws.com}, Action: sts:AssumeRole}]
+      Policies:
+        - PolicyName: menor-privilegio
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - {Effect: Allow, Action: s3:GetObject, Resource: !Sub "arn:aws:s3:::${Projeto}-${AWS::AccountId}/alertas/*"}
+              - {Effect: Allow, Action: dynamodb:PutItem, Resource: !GetAtt AlertasTable.Arn}
+              - {Effect: Allow, Action: sns:Publish, Resource: !Ref AlertasTopic}
+              - {Effect: Allow, Action: bedrock:InvokeModel, Resource: !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/${ModeloId}"}
+              - {Effect: Allow, Action: [logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents], Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${Projeto}-*"}
+      Tags: [{Key: Projeto, Value: !Ref Projeto}]
+
+  TriagemFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub ${Projeto}-triagem
+      Runtime: python3.12
+      Handler: app.handler
+      Timeout: 120   # o padrão de 3 s não dá tempo para o modelo responder
+      MemorySize: 256
+      Role: !GetAtt TriagemRole.Arn
+      Code: src/triagem   # aws cloudformation package troca por S3Bucket/S3Key
+      Environment:
+        Variables: {TABELA: !Ref AlertasTable, TOPICO: !Ref AlertasTopic, MODELO: !Ref ModeloId}
+      Tags: [{Key: Projeto, Value: !Ref Projeto}]
+
+  TriagemPermissaoS3:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref TriagemFunction
+      Principal: s3.amazonaws.com
+      SourceAccount: !Ref AWS::AccountId
+      SourceArn: !Sub arn:aws:s3:::${Projeto}-${AWS::AccountId}
+
+  # ---------- resumo diário ----------
+  ResumoRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement: [{Effect: Allow, Principal: {Service: lambda.amazonaws.com}, Action: sts:AssumeRole}]
+      Policies:
+        - PolicyName: menor-privilegio
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - {Effect: Allow, Action: dynamodb:Scan, Resource: !GetAtt AlertasTable.Arn}
+              - {Effect: Allow, Action: s3:PutObject, Resource: !Sub "arn:aws:s3:::${Projeto}-${AWS::AccountId}/resumos/*"}
+              - {Effect: Allow, Action: sns:Publish, Resource: !Ref AlertasTopic}
+              - {Effect: Allow, Action: bedrock:InvokeModel, Resource: !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/${ModeloId}"}
+              - {Effect: Allow, Action: [logs:CreateLogGroup, logs:CreateLogStream, logs:PutLogEvents], Resource: !Sub "arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/${Projeto}-*"}
+      Tags: [{Key: Projeto, Value: !Ref Projeto}]
+
+  ResumoFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub ${Projeto}-resumo
+      Runtime: python3.12
+      Handler: app.handler
+      Timeout: 180
+      MemorySize: 256
+      Role: !GetAtt ResumoRole.Arn
+      Code: src/resumo
+      Environment:
+        Variables: {TABELA: !Ref AlertasTable, TOPICO: !Ref AlertasTopic, BUCKET: !Sub "${Projeto}-${AWS::AccountId}", MODELO: !Ref ModeloId}
+      Tags: [{Key: Projeto, Value: !Ref Projeto}]
+
+  ResumoAgenda:
+    Type: AWS::Events::Rule
+    Properties:
+      Name: !Sub ${Projeto}-resumo-diario
+      ScheduleExpression: !Ref HorarioResumo
+      Targets: [{Id: resumo, Arn: !GetAtt ResumoFunction.Arn}]
+
+  ResumoPermissaoEvents:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref ResumoFunction
+      Principal: events.amazonaws.com
+      SourceArn: !GetAtt ResumoAgenda.Arn
+
+Outputs:
+  Bucket:
+    Value: !Ref AlertasBucket
+  Tabela:
+    Value: !Ref AlertasTable
+  Topico:
+    Value: !Ref AlertasTopic
+  FilaEquipe:
+    Value: !Ref EquipeQueue

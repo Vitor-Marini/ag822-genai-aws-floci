@@ -1,0 +1,15 @@
+[11/15/26 00:58:35] INFO     HTTP Request: GET                   _client.py:1740
+                             https://docs.aws.amazon.com/vpc/lat                
+                             est/userguide/vpc-network-acls.html                
+                             ?session=228b9301-41e5-45d8-8fbf-5d                
+                             88c07ef442 "HTTP/1.1 200 OK"                       
+[11/15/26 00:58:36] INFO     HTTP Request: GET                   _client.py:1740
+                             https://docs.aws.amazon.com/vpc/lat                
+                             est/userguide/amazon-vpc-limits.htm                
+                             l?session=228b9301-41e5-45d8-8fbf-5                
+                             d88c07ef442 "HTTP/1.1 200 OK"                      
+# https://docs.aws.amazon.com/vpc/latest/userguide/vpc-network-acls.html
+   + You can associate a network ACL with multiple subnets. However, a subnet can be associated with only one network ACL at a time. When you associate a network ACL with a subnet, the previous association is removed.
+# https://docs.aws.amazon.com/vpc/latest/userguide/amazon-vpc-limits.html
+   |  Inbound or outbound rules per security group  |  60  | [Yes](https://console.aws.amazon.com/servicequotas/home/services/vpc/quotas/L-0EA8095F) | This quota is enforced separately for inbound and outbound rules. For an account with the default quota of 60 rules, a security group can have 60 inboun
+   |  Security groups per network interface  |  5  | [Yes](https://console.aws.amazon.com/servicequotas/home/services/vpc/quotas/L-2AFB9258)(up to 16) | This quota multiplied by the quota for rules per security group cannot exceed 1,000. To reduce the security groups per network interface quota below t

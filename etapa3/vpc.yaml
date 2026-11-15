@@ -1,0 +1,130 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Lab 2 por IaC (VPC pública/privada, web server só HTTP) + bucket e tabela da Etapa 4. Revisado a partir de vpc.original.yaml.
+
+Parameters:
+  Projeto:
+    Type: String
+    Default: ag822-genai
+    Description: Tag de custo (Unidade II)
+  AmiId:
+    # P3: AMI vinha fixa (ami-0c55b1c9cc9cbaf3b); o parâmetro SSM público sempre aponta para a AMI atual da região
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags: [{Key: Name, Value: lab-ia-vpc}, {Key: Projeto, Value: !Ref Projeto}]
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags: [{Key: Name, Value: lab-ia-igw}, {Key: Projeto, Value: !Ref Projeto}]
+
+  VPCGatewayAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref VPC
+      InternetGatewayId: !Ref InternetGateway
+
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.1.0/24
+      AvailabilityZone: !Select [0, !GetAZs ""]   # P6: AZ não fica mais fixa em us-east-1a
+      Tags: [{Key: Name, Value: lab-ia-publica}, {Key: Projeto, Value: !Ref Projeto}]
+
+  PrivateSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref VPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: !Select [0, !GetAZs ""]
+      Tags: [{Key: Name, Value: lab-ia-privada}, {Key: Projeto, Value: !Ref Projeto}]
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+      Tags: [{Key: Name, Value: lab-ia-rt-publica}, {Key: Projeto, Value: !Ref Projeto}]
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: VPCGatewayAttachment   # P5: sem isso a rota pode ser criada antes do IGW estar anexado
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref PublicRouteTable
+
+  WebSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Somente HTTP de entrada para o servidor web   # P2: propriedade obrigatória ausente
+      VpcId: !Ref VPC
+      SecurityGroupIngress:
+        - {IpProtocol: tcp, FromPort: 80, ToPort: 80, CidrIp: 0.0.0.0/0, Description: HTTP}
+      Tags: [{Key: Name, Value: lab-ia-sg-web}, {Key: Projeto, Value: !Ref Projeto}]
+
+  WebServer:
+    Type: AWS::EC2::Instance
+    DependsOn: VPCGatewayAttachment   # P5: IP público só funciona com o IGW anexado
+    Properties:
+      ImageId: !Ref AmiId
+      InstanceType: t3.micro
+      MetadataOptions: {HttpTokens: required}   # P9: IMDSv2 obrigatório
+      NetworkInterfaces:
+        - DeviceIndex: "0"   # P2: propriedade obrigatória ausente
+          SubnetId: !Ref PublicSubnet
+          AssociatePublicIpAddress: true
+          GroupSet: [!Ref WebSecurityGroup]
+      UserData:
+        Fn::Base64: |   # P7: Fn::Sub removido (não havia variáveis)
+          #!/bin/bash
+          dnf install -y httpd
+          systemctl enable --now httpd
+          echo "<h1>Lab IA - AG822</h1>" > /var/www/html/index.html
+      Tags: [{Key: Name, Value: lab-ia-web}, {Key: Projeto, Value: !Ref Projeto}]
+
+  RelatoriosBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub relatorios-campo-lab-${AWS::AccountId}   # P8: nome de bucket é global; o sufixo evita colisão
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration: [{ServerSideEncryptionByDefault: {SSEAlgorithm: AES256}}]
+      Tags: [{Key: Projeto, Value: !Ref Projeto}]
+
+  TriagemTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: triagem-lab
+      AttributeDefinitions: [{AttributeName: arquivo, AttributeType: S}]
+      KeySchema: [{AttributeName: arquivo, KeyType: HASH}]
+      BillingMode: PAY_PER_REQUEST
+      Tags: [{Key: Projeto, Value: !Ref Projeto}]
+
+Outputs:
+  WebPublicIp:
+    Description: IP público do servidor web
+    Value: !GetAtt WebServer.PublicIp
+  WebUrl:
+    Value: !Sub http://${WebServer.PublicDnsName}
+  BucketName:
+    Value: !Ref RelatoriosBucket
+  TableArn:
+    Value: !GetAtt TriagemTable.Arn

@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "ask": [
+      "Bash(aws * delete*)",
+      "Bash(aws * rm *)",
+      "Bash(aws * rb *)",
+      "Bash(aws * terminate*)",
+      "Bash(aws * --force*)",
+      "Bash(aws iam *)",
+      "Bash(aws autoscaling set-desired-capacity*)",
+      "Bash(aws cloudformation deploy*)",
+      "Bash(aws cloudformation delete-stack*)",
+      "Bash(*deploy.sh*)",
+      "Bash(*destruir.sh*)"
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+# Recuperado do log de auditoria /agente/diagnostico, stream execucao-20261115-034601
+[iteração 1] ferramenta ler_metricas({"asg": "asg-campo", "minutos": 15})
+[iteração 1] ferramenta descrever_asg({"asg": "asg-campo"})
+[iteração 1] ferramenta listar_atividades({"asg": "asg-campo"})
+[iteração 1] ferramenta ler_alarmes({})
+[resposta_final] O que aconteceu:
+- O alarme `cpu-alta-asg-campo` disparou, indicando que a CPU média do grupo de Auto Scaling `asg-campo` está acima do limite definido (80%).
+- As métricas mostram que a CPU atingiu valores acima de 80% por 12 minutos consecutivos, com picos de até 95%.
+- O grupo de Auto Scaling `asg-campo` tem capacidade mínima de 1 e máxima de 4 instâncias, com a capacidade desejada atualmente em 1.
+- Recentemente, foram lançadas duas novas instâncias (`i-28b608f21c60b9f36` e `i-6c94334dcb0a7890a`), mas o alarme ainda está em estado ALARM.
+
+Causa provável:
+- A carga de trabalho da aplicação está aumentando, levando à sobrecarga da CPU.
+- A nova instância recentemente lançada (`i-28b608f21c60b9f36`) ainda está se adaptando e pode não estar distribuindo a carga de trabalho de forma eficiente.
+
+Ação recomendada:
+- CHAME a ferramenta `ajustar_capacidade` com desejado + 1 (um passo por vez), para aumentar a capacidade desejada para 2 instâncias. Isso permitirá que o sistema se adapte gradualmente à carga de trabalho aumentada.
