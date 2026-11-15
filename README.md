@@ -4,8 +4,6 @@ Roteiro de autoestudo do AG822 (Engenharia de Computação, UNAERP), feito de po
 [Floci](https://floci.io) emula as APIs da AWS em `localhost:4566` e repassa o Bedrock ao **qwen2.5:7b** rodando no
 Ollama. Nenhuma conta AWS foi usada; todo script que escreve recursos aborta se a conta não for `000000000000`.
 
-**Grupo:** _(nomes dos integrantes)_
-
 ## Entregas
 
 | Etapa | Entrega pedida | Onde está | Destaque |

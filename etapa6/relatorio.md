@@ -1,6 +1,6 @@
 # Relatório — Governança, custo, segurança e TI Verde
 
-**Triagem de relatórios de campo com IA generativa (Etapa 4 e projeto integrador).** Grupo: _(nomes dos integrantes)_ · AG822.
+**Triagem de relatórios de campo com IA generativa (Etapa 4 e projeto integrador).** AG822.
 Medições feitas no Floci com qwen2.5:7b local; custos projetados com preços oficiais da AWS (us-east-1, nov./2026).
 Detalhes, scripts e evidências: [anexo](README.md).
 
