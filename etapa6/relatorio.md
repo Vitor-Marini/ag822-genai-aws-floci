@@ -1,6 +1,6 @@
 # Relatório — Governança, custo, segurança e TI Verde
 
-**Triagem de relatórios de campo com IA generativa (Etapa 4 e projeto integrador).** AG822.
+**Triagem de relatórios de campo com IA generativa (Etapa 4 e projeto integrador).** Grupo: Vitor Ferraz Marini (837771) e Otavio Ribeiro Moreira da Costa (838807) · AG822.
 Medições feitas no Floci com qwen2.5:7b local; custos projetados com preços oficiais da AWS (us-east-1, nov./2026).
 Detalhes, scripts e evidências: [anexo](README.md).
 
